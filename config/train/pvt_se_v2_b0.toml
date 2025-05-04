@@ -1,0 +1,32 @@
+inherit = "./config/common/pvt_v2_b0_se_train.toml"
+
+[meta]
+save_dir = "experiments"
+use_amp = false
+
+[model]
+path = "model.pvt_se_model.Model"
+
+
+[train_dataset]
+[train_dataset.args]
+#clean_dataset = "/media/administrator/Data/DNS-Challenge/datasets/clean/"
+#clean_dataset = "/home/administrator/Data/DNS-Challenge/datasets/test_set/synthetic/no_reverb/audio/"
+
+[train_dataset.dataloader]
+batch_size = 64
+num_workers = 2
+
+[validation_dataset]
+path = "dataset.DNS_INTERSPEECH_validation.Dataset"
+
+[trainer]
+path = "trainer.pvt_se_trainer_si_sdr.Trainer"
+[trainer.train]
+save_checkpoint_interval = 1
+[trainer.validation]
+validation_interval = 1
+[trainer.visualization]
+n_samples = 20
+num_workers = 6
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]

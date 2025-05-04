@@ -1,0 +1,9 @@
+inherit = "config/common/pvt_se_si_sdr_inference.toml"
+
+[dataset]
+path = "dataset.Demand.DemandDatasetInference"
+[dataset.args]
+noisy_dataset = "./demand"
+limit = false
+offset = 0
+sr = 16000

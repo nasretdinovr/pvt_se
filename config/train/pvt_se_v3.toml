@@ -1,0 +1,80 @@
+inherit = "config/common/pvt_se_train_tiny.toml"
+
+[meta]
+save_dir = "experiments"
+use_amp = false
+
+[model]
+path = "model.pvt_se_model.Model"
+
+
+[train_dataset]
+[train_dataset.args]
+#clean_dataset = "/media/administrator/Data/DNS-Challenge/datasets/clean/"
+#clean_dataset = "/home/administrator/Data/DNS-Challenge/datasets/test_set/synthetic/no_reverb/audio/"
+
+[train_dataset.dataloader]
+batch_size = 16
+num_workers = 2
+
+[validation_dataset]
+
+[model.args]
+pe_depth = 0
+#look_ahead = 2
+
+[model.backbone]
+path = "src.model.module.pvt.PyramidVisionTransformer"
+[model.backbone.args]
+spec_size = [256, 128]
+patch_size = [[8,2], [2,2], [2,1], [1,1]]
+embed_dims = [64, 128, 320, 512]
+num_heads = [1, 2, 5, 8]
+mlp_ratios = [8, 8, 4, 4]
+qkv_bias = true
+depths = [2, 2, 6, 3]
+sr_ratios = [8, 4, 2, 1]
+att_vis = false
+[model.backbone.args.conv_cfg]
+in_channels = 2
+out_channels = 16
+kernel_size = [3, 5]
+stride = 1
+padding = [1, 2]
+activate_function = "PReLU"
+with_norm = true
+
+[model.head]
+path = "src.model.module.pvt_decoder.DePyramidVisionTransformer"
+[model.head.args]
+feature_size = [8, 32]
+patch_size = [[1,1], [2,1], [2,2], [8,2]]
+embed_dims = [512, 320, 128, 64]
+num_heads = [5, 2, 1]
+mlp_ratios = [4, 8, 8]
+qkv_bias = true
+depths = [6, 2, 2]
+sr_ratios = [1, 2, 4]
+att_vis = false
+
+[model.head.args.conv_cfg]
+in_channels = 32
+out_channels = 2
+kernel_size = [3, 5]
+stride = 1
+padding = [1, 2]
+activate_function = false
+final_amplification = 1
+with_norm = false
+
+
+[trainer]
+path = "trainer.pvt_se_trainer_si_sdr.Trainer"
+[trainer.train]
+save_checkpoint_interval = 1
+[trainer.validation]
+validation_interval = 1
+[trainer.visualization]
+n_samples = 20
+num_workers = 6
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]

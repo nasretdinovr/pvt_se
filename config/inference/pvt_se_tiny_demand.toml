@@ -1,0 +1,11 @@
+inherit = "config/common/pvt_se_tiny_inference.toml"
+
+[dataset]
+path = "dataset.Demand.DemandDatasetInference"
+[dataset.args]
+noisy_dataset = "./demand"
+
+#hop_length = 255
+limit = false
+offset = 0
+sr = 16000

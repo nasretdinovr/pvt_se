@@ -1,0 +1,41 @@
+inherit = "config/common/pvt_se_train_si_sdr_scp.toml"
+
+[meta]
+save_dir = "experiments"
+use_amp = false
+
+[model]
+path = "model.pvt_se_model.Model"
+[model.args]
+pe_depth = 0
+
+
+[model.backbone.args.conv_cfg]
+in_channels = 2
+
+[train_dataset]
+path = "dataset.dataset_from_scp.Dataset"
+[train_dataset.args]
+path = "/home/administrator/Data/DNS-Challenge_142h_5ep/"
+
+[train_dataset.sampler]
+shuffle = true
+
+[train_dataset.dataloader]
+batch_size = 16
+num_workers = 2
+
+[validation_dataset]
+path = "dataset.DNS_INTERSPEECH_validation.Dataset"
+
+[trainer]
+path = "trainer.pvt_se_trainer_si_sdr_scp.Trainer"
+[trainer.train]
+epochs = 3
+save_checkpoint_interval = 1
+[trainer.validation]
+validation_interval = 1
+[trainer.visualization]
+n_samples = 20
+num_workers = 6
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]

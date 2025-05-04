@@ -1,0 +1,125 @@
+[meta]
+save_dir = "experiments"
+description = "This is a description of Perceiver experiment."
+seed = 0  # set random seed for random, numpy, pytorch-gpu and pytorch-cpu
+keep_reproducibility = false  # see https://pytorch.org/docs/stable/notes/randomness.html
+use_amp = true  # use automatic mixed precision, it will benefits Tensor Core-enabled GPU (e.g. Volta, Turing, Ampere). 2-3X speedup。
+
+[acoustic]
+sr = 16000
+n_fft = 512
+win_length = 512
+hop_length = 256
+center = false
+power = 0.3
+
+[args]
+look_ahead = 1
+predicted_frames = 3
+
+[train_dataset]
+path = "dataset.DNS_INTERSPEECH_train.Dataset"
+[train_dataset.args]
+clean_dataset = "/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/clean"
+clean_dataset_limit = false
+clean_dataset_offset = 0
+noise_dataset = "/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/noise"
+noise_dataset_limit = false
+noise_dataset_offset = 0
+rir_dataset = "/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/impulse_responses"
+rir_dataset_limit = false
+rir_dataset_offset = 0
+snr_range = [-5, 20]
+reverb_proportion = 0.75
+silence_length = 0.2
+target_dB_FS = -25
+target_dB_FS_floating_value = 10
+sub_sample_length = 2.064
+sr = 16000
+pre_load_clean_dataset = false
+pre_load_noise = false
+pre_load_rir = false
+num_workers = 36
+
+
+[train_dataset.dataloader]
+batch_size = 8
+num_workers = 10
+shuffle = true
+pin_memory = true
+drop_last = true
+
+[validation_dataset]
+path = "dataset.DNS_INTERSPEECH_validation.Dataset"
+[validation_dataset.args]
+#dataset_dir_list = "/home/administrator/Data/DNS-Challenge/dataset/raw_data/test_set/synthetic/no_reverb/audio/noisy"
+dataset_dir_list = ["/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/test_set/synthetic/no_reverb/audio/",
+                    "/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/test_set/synthetic/with_reverb/audio/"]
+sr = 16000
+sub_sample_length = 10
+
+[model]
+path = "src.model.module.perceiver.Perceiver"
+[model.args]
+input_channels=2  # number of channels for each token of the input
+input_axis=2 # number of axis for input data (2 for images, 3 for video)
+num_freq_bands=6  # number of freq bands, with original value (2 * K + 1)
+max_freq=10  # maximum frequency, hyperparameter depending on how fine the data is
+depth=3  # depth of net
+num_latents=771
+# number of latents, or induced set points, or centroids. different papers giving it different names
+cross_dim=512  # cross attention dimension
+latent_dim=512  # latent dimension
+cross_heads=1  # number of heads for cross attention. paper said 1
+latent_heads=8  # number of heads for latent self attention, 8
+cross_dim_head=64
+latent_dim_head=64
+num_classes=2  # output number of classes
+attn_dropout=0
+ff_dropout=0
+weight_tie_layers=false  # whether to weight tie layers (optional, as indicated in the diagram)
+
+
+
+
+[loss_function]
+[loss_function.mask]
+path = "model.loss.no_loss"
+[loss_function.mask.args]
+reduction = 'mean'
+multiplier = 1
+[loss_function.mask.compress]
+compress = false
+
+[loss_function.spec]
+path = "model.loss.mse_loss"
+[loss_function.spec.args]
+reduction = 'mean'
+multiplier = 1
+
+[loss_function.signal]
+path = "model.loss.si_sdr_loss"
+[loss_function.signal.args]
+reduction = 'mean'
+take_log = true
+zero_mean = true
+multiplier = 1
+
+[optimizer]
+lr = 1e-4
+beta1 = 0.9
+beta2 = 0.999
+
+[trainer]
+path = "trainer.perceiver_se_trainer.Trainer"
+[trainer.train]
+epochs = 9999
+save_checkpoint_interval = 10
+clip_grad_norm_value = 5
+[trainer.validation]
+validation_interval = 5
+save_max_metric_score = true
+[trainer.visualization]
+n_samples = 10
+num_workers = 36
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]

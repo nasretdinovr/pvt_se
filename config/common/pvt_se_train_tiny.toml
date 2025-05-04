@@ -1,0 +1,150 @@
+[meta]
+save_dir = "experiments"
+description = "This is a description of FullSubNet experiment."
+seed = 0  # set random seed for random, numpy, pytorch-gpu and pytorch-cpu
+keep_reproducibility = false  # see https://pytorch.org/docs/stable/notes/randomness.html
+use_amp = false  # use automatic mixed precision, it will benefits Tensor Core-enabled GPU (e.g. Volta, Turing, Ampere). 2-3X speedup。
+
+[acoustic]
+sr = 16000
+n_fft = 510
+win_length = 510
+hop_length = 255
+center = true
+power = 0.3
+
+[train_dataset]
+path = "dataset.DNS_INTERSPEECH_train.Dataset"
+[train_dataset.args]
+clean_dataset = "/media/administrator/Data/DNS-Challenge/datasets/clean"
+clean_dataset_limit = false
+clean_dataset_offset = 0
+noise_dataset = "/media/administrator/Data/DNS-Challenge/datasets/noise"
+noise_dataset_limit = false
+noise_dataset_offset = 0
+rir_dataset = "/media/administrator/Data/DNS-Challenge/datasets/impulse_responses"
+rir_dataset_limit = false
+rir_dataset_offset = 0
+snr_range = [-5, 20]
+reverb_proportion = 0.75
+silence_length = 0.2
+target_dB_FS = -25
+target_dB_FS_floating_value = 10
+sub_sample_length = 2.0399375
+sr = 16000
+pre_load_clean_dataset = false
+pre_load_noise = false
+pre_load_rir = false
+num_workers = 36
+
+[train_dataset.sampler]
+shuffle = true
+
+[train_dataset.dataloader]
+batch_size = 1
+num_workers = 10
+pin_memory = true
+drop_last = true
+
+[validation_dataset]
+path = "dataset.DNS_INTERSPEECH_validation.Dataset"
+[validation_dataset.args]
+#dataset_dir_list = "/home/administrator/Data/DNS-Challenge/dataset/raw_data/test_set/synthetic/no_reverb/audio/noisy"
+dataset_dir_list = ["/home/administrator/Data/DNS-Challenge/datasets/test_set/synthetic/no_reverb/audio/",
+                    "/home/administrator/Data/DNS-Challenge/datasets/test_set/synthetic/with_reverb/audio/"]
+sr = 16000
+sub_sample_length = 2.0399375
+
+[model]
+path = "src.model.pvt_se_model.Model"
+[model.args]
+pe_depth = 10
+#look_ahead = 2
+
+[model.backbone]
+path = "src.model.module.pvt.PyramidVisionTransformer"
+[model.backbone.args]
+spec_size = [256, 128]
+patch_size = [[8,2], [2,2], [2,1], [1,1]]
+embed_dims = [64, 128, 320, 512]
+num_heads = [1, 2, 5, 8]
+mlp_ratios = [8, 8, 4, 4]
+qkv_bias = true
+depths = [2, 2, 2, 2]
+sr_ratios = [8, 4, 2, 1]
+att_vis = false
+[model.backbone.args.conv_cfg]
+in_channels = 12
+out_channels = 16
+kernel_size = [3, 5]
+stride = 1
+padding = [1, 2]
+activate_function = "PReLU"
+with_norm = true
+
+
+[model.head]
+path = "src.model.module.pvt_decoder.DePyramidVisionTransformer"
+[model.head.args]
+feature_size = [8, 32]
+patch_size = [[1,1], [2,1], [2,2], [8,2]]
+embed_dims = [512, 320, 128, 64]
+num_heads = [4, 2, 1]
+mlp_ratios = [4, 8, 8]
+qkv_bias = true
+depths = [2, 2, 2]
+sr_ratios = [2, 4, 8]
+att_vis = false
+
+[model.head.args.conv_cfg]
+in_channels = 32
+out_channels = 2
+kernel_size = [3, 5]
+stride = 1
+padding = [1, 2]
+activate_function = false
+final_amplification = 1
+with_norm = false
+
+[loss_function]
+[loss_function.mask]
+path = "model.loss.no_loss"
+[loss_function.mask.args]
+reduction = 'mean'
+multiplier = 1
+[loss_function.mask.compress]
+compress = false
+
+[loss_function.spec]
+path = "model.loss.no_loss"
+[loss_function.spec.args]
+reduction = 'mean'
+multiplier = 1
+
+[loss_function.signal]
+path = "model.loss.si_sdr_loss"
+[loss_function.signal.args]
+reduction = 'mean'
+take_log = true
+zero_mean = true
+multiplier = 1
+
+[optimizer]
+lr = 1e-4
+beta1 = 0.9
+beta2 = 0.999
+weight_decay = 0
+
+[trainer]
+path = "trainer.pvt_se_trainer.Trainer"
+[trainer.train]
+epochs = 9999
+save_checkpoint_interval = 1
+clip_grad_norm_value = 5
+[trainer.validation]
+validation_interval = 1
+save_max_metric_score = true
+[trainer.visualization]
+n_samples = 10
+num_workers = 36
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]

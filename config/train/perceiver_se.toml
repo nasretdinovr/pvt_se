@@ -1,0 +1,35 @@
+inherit = "config/common/perceiver_train.toml"
+
+[meta]
+save_dir = "experiments"
+use_amp = true
+
+[model]
+path = "model.module.perceiver.Perceiver"
+
+
+
+[train_dataset]
+[train_dataset.args]
+clean_dataset = "/media/administrator/Локальный диск/Data/DNS-Challenge/datasets/clean"
+#clean_dataset = "/media/administrator/736be68f-3ad2-4ea3-8ebf-c2e3983b05c9/Data/DNS-Challenge/datasets/clean/"
+#clean_dataset = "/home/administrator/Data/DNS-Challenge/datasets/test_set/synthetic/no_reverb/audio/"
+
+[train_dataset.dataloader]
+batch_size = 8
+num_workers = 2
+shuffle = true
+
+[validation_dataset]
+path = "dataset.DNS_INTERSPEECH_validation.Dataset"
+
+[trainer]
+path = "trainer.perceiver_se_trainer.Trainer"
+[trainer.train]
+save_checkpoint_interval = 1
+[trainer.validation]
+validation_interval = 5
+[trainer.visualization]
+n_samples = 20
+num_workers = 6
+metrics = ["WB_PESQ", "NB_PESQ", "STOI", "SI_SDR"]
