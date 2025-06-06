@@ -142,6 +142,8 @@ class Inferencer(BaseInferencer):
         framed = framed.reshape(-1, frame_length)
 
         noisy_complex = self.stft(framed)
+        noisy_complex = torch.stack([noisy_complex.real, noisy_complex.imag], dim=-1)
+
 
         framed_enhanced = []
         atts = []
