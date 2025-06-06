@@ -24,7 +24,7 @@ class BaseInferencer:
         self.config = config['inferencer']['args']
 
         # self.device = torch.device("cpu")
-        self.device = torch.device("cuda:1")
+        self.device = torch.device("cuda:0")
 
 
         print("Loading inference dataset...")
