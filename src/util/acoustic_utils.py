@@ -78,6 +78,8 @@ def istft(complex_tensor, n_fft, hop_length, win_length, device, length=None,
         assert isinstance(complex_tensor, tuple) or isinstance(complex_tensor, list)
         mag, phase = complex_tensor
         complex_tensor = torch.stack([(mag * torch.cos(phase)), (mag * torch.sin(phase))], dim=-1)
+    
+    complex_tensor = torch.complex(complex_tensor[..., 0], complex_tensor[..., 1])
     y = torch.istft(complex_tensor, n_fft, hop_length, win_length, window, length=length, center=center)
 
     return y
