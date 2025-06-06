@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-import may_be_useful.pvt as pvt
 from src.util.positional_encoding import PositionalEncodingPermute2D
 
 
