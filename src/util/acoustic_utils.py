@@ -63,7 +63,7 @@ def complex_mul(noisy_r, noisy_i, mask_r, mask_i):
 def stft(y, n_fft, hop_length, win_length, device='cpu', center=True, power=None):
 
     window = torch.hann_window(n_fft).to(device)
-    return torch.stft(y, n_fft, hop_length, win_length, window=window, center=center)
+    return torch.stft(y, n_fft, hop_length, win_length, window=window, center=center, return_complex=True)
 
 
 def istft(complex_tensor, n_fft, hop_length, win_length, device, length=None,
