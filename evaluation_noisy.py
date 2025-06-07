@@ -10,7 +10,7 @@ from src.dataset.raw_noisy_dataset import from_path as dataset_from_path
 from src.util.metrics import SI_SDR, STOI, WB_PESQ, NB_PESQ
 
 
-def evaluate(noisy_data_dir, sample_rate):
+def evaluate(noisy_data_dir, unprocessed=False):
 
     dataset = dataset_from_path(noisy_data_dir)
     all_wb_pesq = np.zeros(len(dataset))
@@ -38,9 +38,12 @@ def evaluate(noisy_data_dir, sample_rate):
                               columns=['filenames', 'wb_pesq', 'nb_pesq', 'stoi', 'si_sdr'])
 
     csv_dir = '/'.join(noisy_data_dir.split('/')[:-1])+'/'
-    metrics_df.to_csv(csv_dir + 'metrics_noisy.csv', index=False)
-    metrics_df[['wb_pesq', 'nb_pesq', 'stoi', 'si_sdr']].astype(float).mean().to_csv(csv_dir + 'mean_metrics_noisy.txt', header=False)
-
+    if not unprocessed:
+        metrics_df.to_csv(csv_dir + 'metrics_enhanced.csv', index=False)
+        metrics_df[['wb_pesq', 'nb_pesq', 'stoi', 'si_sdr']].astype(float).mean().to_csv(csv_dir + 'mean_metrics_enhanced.txt', header=False)
+    else:
+        metrics_df.to_csv(csv_dir + 'metrics_unproc.csv', index=False)
+        metrics_df[['wb_pesq', 'nb_pesq', 'stoi', 'si_sdr']].astype(float).mean().to_csv(csv_dir + 'metrics_unproc.txt', header=False)
 
 if __name__ == '__main__':
     # args = OmegaConf.load(os.path.join('./configs/evaluation_config.yaml'))

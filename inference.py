@@ -41,4 +41,4 @@ if __name__ == "__main__":
 
     sys.path.append(os.path.join(os.getcwd(), "src"))
     main(configuration, checkpoint_path, output_dir)
-    evaluate(os.path.join(output_dir, 'enhanced'), configuration['acoustic']['sr'])
+    evaluate(os.path.join(output_dir, 'enhanced'))
